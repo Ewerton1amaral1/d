@@ -14,6 +14,10 @@ app.get('/health', (req, res) => {
     res.json({ status: 'ok', message: 'Delivery Master Backend is running' });
 });
 
+app.get('/', (req, res) => {
+    res.send('API Delivery Master is Online 🚀');
+});
+
 import productRoutes from './routes/product.routes';
 import orderRoutes from './routes/order.routes';
 import authRoutes from './routes/auth.routes';
@@ -37,10 +41,8 @@ app.use('/api/employees', employeeRoutes);
 app.use('/api/supplies', supplyRoutes);
 app.use('/api/reports', reportRoutes);
 
-if (process.env.NODE_ENV !== 'production') {
-    app.listen(PORT, () => {
-        console.log(`Server is running on port ${PORT}`);
-    });
-}
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});
 
 export default app;
