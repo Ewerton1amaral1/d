@@ -10,7 +10,7 @@ async function main() {
         console.log(`Found ${products.length} products:`);
         products.forEach(p => console.log(`- ${p.name} (Price: ${p.price}, Stock: ${p.stock})`));
 
-        const settings = await prisma.storeSettings.findFirst();
+        const settings = await prisma.store.findFirst();
         console.log('Store Settings:', settings);
     } catch (e) {
         console.error('Error connecting to DB:', e);

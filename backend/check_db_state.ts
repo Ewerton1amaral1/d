@@ -3,8 +3,9 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 async function main() {
-    console.log('--- STORE SETTINGS ---');
-    const settings = await prisma.storeSettings.findFirst();
+    console.log('--- STORE SETTINGS (Store) ---');
+    const settings = await prisma.store.findFirst();
+    // @ts-ignore
     console.dir(settings, { depth: null });
 
     console.log('\n--- RECENT ORDERS ---');
