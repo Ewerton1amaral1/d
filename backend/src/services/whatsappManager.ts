@@ -102,9 +102,85 @@ export class WhatsappManager {
     }
 
     private async handleMessage(storeId: string, msg: WpMessage, client: Client) {
-        // ... (Logic from old service, but scoped to storeId)
-        // We will implement the full bot logic here later or delegate to a BotService
-        console.log(`[Store ${storeId}] Message received: ${msg.body}`);
+        try {
+            console.log(`[Store ${storeId}] Message from ${msg.from}: ${msg.body}`);
+
+            // 1. Find or Create Chat
+            const contact = await msg.getContact();
+            const fromJid = msg.from;
+            const contactName = contact.pushname || contact.name || fromJid.split('@')[0];
+
+            let chat = await prisma.chat.findFirst({
+                where: { storeId, remoteJid: fromJid }
+            });
+
+            if (!chat) {
+                chat = await prisma.chat.create({
+                    data: {
+                        storeId,
+                        remoteJid: fromJid,
+                        contactName: contactName,
+                        botStatus: 'ACTIVE'
+                    }
+                });
+            }
+
+            // 2. Save Incoming Message
+            await prisma.message.create({
+                data: {
+                    chatId: chat.id,
+                    body: msg.body,
+                    fromMe: false,
+                    timestamp: new Date()
+                }
+            });
+
+            // Update chat timestamp
+            await prisma.chat.update({
+                where: { id: chat.id },
+                data: { lastMessageAt: new Date() }
+            });
+
+            // 3. Bot Logic
+            if (chat.botStatus === 'ACTIVE') {
+                let response = '';
+
+                const lowerBody = msg.body.toLowerCase().trim();
+
+                if (lowerBody === 'oi' || lowerBody === 'olá' || lowerBody === 'ola' || lowerBody === 'bot') {
+                    response = `👋 Olá, *${contactName}*! Bem-vindo(a) ao atendimento automático.\n\nEscolha uma opção:\n\n1️⃣ *Ver Cardápio Digital*\n2️⃣ *Falar com Atendente*\n3️⃣ *Saber Horários*`;
+                } else if (lowerBody === '1') {
+                    // TODO: Replace with real dynamic link if possible, or generic
+                    response = `🍔 *Nosso Cardápio*: https://delivery-master-v2.vercel.app/menu?store=${storeId}\n\nFaça seu pedido por lá!`;
+                } else if (lowerBody === '2') {
+                    response = `🔔 Chamei um atendente para falar com você. Aguarde um instante!`;
+                    await prisma.chat.update({ where: { id: chat.id }, data: { botStatus: 'PAUSED' } });
+                } else if (lowerBody === '3') {
+                    response = `🕒 Funcionamos todos os dias das 18h às 23h!`;
+                } else {
+                    // Default fallback for unknown commands (optional: or stay silent)
+                    // response = `Desculpe, não entendi. Digite *Oi* para ver o menu.`;
+                }
+
+                if (response) {
+                    // Send
+                    await client.sendMessage(fromJid, response);
+
+                    // Save Outgoing Message
+                    await prisma.message.create({
+                        data: {
+                            chatId: chat.id,
+                            body: response,
+                            fromMe: true,
+                            timestamp: new Date()
+                        }
+                    });
+                }
+            }
+
+        } catch (error) {
+            console.error(`[Store ${storeId}] Handle Message Error:`, error);
+        }
     }
 }
 
