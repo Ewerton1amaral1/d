@@ -1,6 +1,9 @@
 # Build Stage
 FROM node:20-alpine AS builder
 
+# Prevent puppeteer from downloading chrome during npm install
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+
 WORKDIR /app
 
 # Install build tools needed for some npm packages
@@ -11,8 +14,6 @@ COPY package.json package-lock.json ./
 # Copy backend package file
 COPY backend/package.json ./backend/
 
-# Install dependencies from root (this installs everything including workspace deps)
-# We use --workspace=backend to install only backend deps + shared, but usually installing all is safer/easier
 # Debug: List files to verify copy
 RUN ls -la
 RUN ls -la backend
@@ -36,6 +37,7 @@ WORKDIR /app
 ENV NODE_ENV=production
 
 # Install Chrome dependencies for Puppeteer
+# Added glib and eudev to fix missing shared library errors
 RUN apk add --no-cache \
     chromium \
     nss \
@@ -44,7 +46,9 @@ RUN apk add --no-cache \
     ca-certificates \
     ttf-freefont \
     nodejs \
-    yarn
+    yarn \
+    glib \
+    eudev
 
 # Tell Puppeteer to skip downloading Chrome. We'll use the installed package.
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
