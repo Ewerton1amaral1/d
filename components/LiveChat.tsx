@@ -28,7 +28,7 @@ export function LiveChat() {
 
     // Fetch Chats
     useEffect(() => {
-        fetch(`${API_URL}/api/whatsapp/chats`)
+        fetch(`${API_URL}/whatsapp/chats`)
             .then(res => res.json())
             .then(data => setChats(data))
             .catch(err => console.error(err));
@@ -44,7 +44,7 @@ export function LiveChat() {
     useEffect(() => {
         if (!selectedChatId) return;
 
-        fetch(`${API_URL}/api/whatsapp/chats/${selectedChatId}/messages`)
+        fetch(`${API_URL}/whatsapp/chats/${selectedChatId}/messages`)
             .then(res => res.json())
             .then(data => setMessages(data))
             .catch(err => console.error(err));
@@ -55,7 +55,7 @@ export function LiveChat() {
         if (!selectedChatId || !newMessage.trim()) return;
 
         try {
-            await fetch(`${API_URL}/api/whatsapp/chats/${selectedChatId}/messages`, {
+            await fetch(`${API_URL}/whatsapp/chats/${selectedChatId}/messages`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ message: newMessage })
@@ -71,7 +71,7 @@ export function LiveChat() {
     const handleDeleteMessage = async (msgId: string) => {
         if (!confirm('Apagar esta mensagem?')) return;
         try {
-            await fetch(`${API_URL}/api/whatsapp/messages/${msgId}`, { method: 'DELETE' });
+            await fetch(`${API_URL}/whatsapp/messages/${msgId}`, { method: 'DELETE' });
             // Remove from local state immediately
             setMessages(prev => prev.filter(m => m.id !== msgId));
         } catch (error) {

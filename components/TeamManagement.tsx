@@ -30,8 +30,8 @@ export const TeamManagement: React.FC<TeamManagementProps> = ({ employees, setEm
          const isUpdate = !!currentEmployee.id;
          const method = isUpdate ? 'PUT' : 'POST';
          const url = isUpdate
-            ? `${API_URL}/api/employees/${currentEmployee.id}`
-            : `${API_URL}/api/employees`;
+            ? `${API_URL}/employees/${currentEmployee.id}`
+            : `${API_URL}/employees`;
 
          const res = await fetch(url, {
             method,
@@ -65,7 +65,7 @@ export const TeamManagement: React.FC<TeamManagementProps> = ({ employees, setEm
    const confirmDelete = async () => {
       if (employeeToDelete) {
          try {
-            const res = await fetch(`${API_URL}/api/employees/${employeeToDelete}`, { method: 'DELETE' });
+            const res = await fetch(`${API_URL}/employees/${employeeToDelete}`, { method: 'DELETE' });
             if (res.ok) {
                setEmployees(prev => prev.filter(e => e.id !== employeeToDelete));
                setEmployeeToDelete(null);
@@ -90,7 +90,7 @@ export const TeamManagement: React.FC<TeamManagementProps> = ({ employees, setEm
       }
 
       try {
-         const res = await fetch(`${API_URL}/api/employees/${currentEmployee.id}/advances`, {
+         const res = await fetch(`${API_URL}/employees/${currentEmployee.id}/advances`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ amount: newAdvance.amount, description: newAdvance.desc || 'Adiantamento' })
@@ -115,7 +115,7 @@ export const TeamManagement: React.FC<TeamManagementProps> = ({ employees, setEm
 
    const removeAdvance = (advId: string) => {
       // Current backend does not expose delete endpoint for advances separately (only cascade delete with employee)
-      // To implement calling DELETE /api/advances/:id we would need that route.
+      // To implement calling DELETE /advances/:id we would need that route.
       alert("Funcionalidade indisponível no momento (requer backend update).");
    };
 

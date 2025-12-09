@@ -16,7 +16,7 @@ export const SupplyManagement: React.FC<SupplyManagementProps> = ({ supplies, se
     if (!newItem.name) return;
 
     try {
-      const res = await fetch(`${API_URL}/api/supplies`, {
+      const res = await fetch(`${API_URL}/supplies`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -42,7 +42,7 @@ export const SupplyManagement: React.FC<SupplyManagementProps> = ({ supplies, se
   const handleDelete = async (id: string) => {
     if (window.confirm('Remover este item do estoque?')) {
       try {
-        const res = await fetch(`${API_URL}/api/supplies/${id}`, { method: 'DELETE' });
+        const res = await fetch(`${API_URL}/supplies/${id}`, { method: 'DELETE' });
         if (res.ok) {
           setSupplies(prev => prev.filter(s => s.id !== id));
         } else {
@@ -64,7 +64,7 @@ export const SupplyManagement: React.FC<SupplyManagementProps> = ({ supplies, se
     setSupplies(prev => prev.map(s => s.id === id ? { ...s, quantity: newQtd } : s));
 
     try {
-      await fetch(`${API_URL}/api/supplies/${id}`, {
+      await fetch(`${API_URL}/supplies/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ quantity: newQtd })

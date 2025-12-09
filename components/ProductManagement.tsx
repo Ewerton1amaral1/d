@@ -24,7 +24,7 @@ export const ProductManagement: React.FC<ProductManagementProps> = ({ products, 
     try {
       if (currentProduct.id) {
         // UPDATE
-        await fetch(`${API_URL}/api/products/${currentProduct.id}`, {
+        await fetch(`${API_URL}/products/${currentProduct.id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(currentProduct)
@@ -32,7 +32,7 @@ export const ProductManagement: React.FC<ProductManagementProps> = ({ products, 
         setProducts(prev => prev.map(p => p.id === currentProduct.id ? currentProduct as Product : p));
       } else {
         // CREATE
-        const res = await fetch(`${API_URL}/api/products`, {
+        const res = await fetch(`${API_URL}/products`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -61,7 +61,7 @@ export const ProductManagement: React.FC<ProductManagementProps> = ({ products, 
   const confirmDelete = async () => {
     if (productToDelete) {
       try {
-        await fetch(`${API_URL}/api/products/${productToDelete}`, {
+        await fetch(`${API_URL}/products/${productToDelete}`, {
           method: 'DELETE'
         });
         setProducts(prev => prev.filter(p => p.id !== productToDelete));

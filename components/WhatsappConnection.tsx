@@ -10,7 +10,7 @@ export function WhatsappConnection() {
     useEffect(() => {
         const fetchStatus = async () => {
             try {
-                const response = await fetch(`${API_URL}/api/whatsapp/status`);
+                const response = await fetch(`${API_URL}/whatsapp/status`);
                 if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
 
                 const data = await response.json();

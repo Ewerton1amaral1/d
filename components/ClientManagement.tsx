@@ -27,8 +27,8 @@ export const ClientManagement: React.FC<ClientManagementProps> = ({ clients, set
     try {
       const isUpdate = !!currentClient.id;
       const url = isUpdate
-        ? `${API_URL}/api/clients/${currentClient.id}`
-        : `${API_URL}/api/clients`;
+        ? `${API_URL}/clients/${currentClient.id}`
+        : `${API_URL}/clients`;
 
       const res = await fetch(url, {
         method: isUpdate ? 'PUT' : 'POST',
@@ -82,7 +82,7 @@ export const ClientManagement: React.FC<ClientManagementProps> = ({ clients, set
         // OR I'll explicitly Add deleteClient to controller in next step.
         // Better: Add deleteClient to controller. It's quick.
 
-        await fetch(`${API_URL}/api/clients/${clientToDelete}`, { method: 'DELETE' });
+        await fetch(`${API_URL}/clients/${clientToDelete}`, { method: 'DELETE' });
 
         setClients(prev => prev.filter(c => c.id !== clientToDelete));
         setClientToDelete(null);

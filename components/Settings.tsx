@@ -58,7 +58,7 @@ export const Settings: React.FC<SettingsProps> = ({ settings, onSave, onLogout, 
     React.useEffect(() => {
         const checkStatus = async () => {
             try {
-                const res = await fetch(`${API_URL}/api/whatsapp/status`);
+                const res = await fetch(`${API_URL}/whatsapp/status`);
                 const data = await res.json();
                 if (data) {
                     setFormData(prev => ({ ...prev, whatsappStatus: data.status }));

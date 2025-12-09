@@ -85,7 +85,7 @@ export const OrderManagement: React.FC<OrderManagementProps> = ({ orders, setOrd
     setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: newStatus, updatedAt: new Date().toISOString() } : o));
 
     // 2. Persist to Backend
-    fetch(`${API_URL}/api/orders/${orderId}/status`, {
+    fetch(`${API_URL}/orders/${orderId}/status`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status: newStatus })

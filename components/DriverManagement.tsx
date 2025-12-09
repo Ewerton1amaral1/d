@@ -35,8 +35,8 @@ export const DriverManagement: React.FC<DriverManagementProps> = ({ drivers, set
          const isUpdate = !!currentDriver.id;
          const method = isUpdate ? 'PUT' : 'POST';
          const url = isUpdate
-            ? `${API_URL}/api/drivers/${currentDriver.id}`
-            : `${API_URL}/api/drivers`;
+            ? `${API_URL}/drivers/${currentDriver.id}`
+            : `${API_URL}/drivers`;
 
          const res = await fetch(url, {
             method,
@@ -69,7 +69,7 @@ export const DriverManagement: React.FC<DriverManagementProps> = ({ drivers, set
    const confirmDelete = async () => {
       if (driverToDelete) {
          try {
-            const res = await fetch(`${API_URL}/api/drivers/${driverToDelete}`, { method: 'DELETE' });
+            const res = await fetch(`${API_URL}/drivers/${driverToDelete}`, { method: 'DELETE' });
             if (res.ok) {
                setDrivers(prev => prev.filter(d => d.id !== driverToDelete));
                setDriverToDelete(null);
