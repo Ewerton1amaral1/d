@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Phone, Wifi, RefreshCw, CheckCircle, AlertCircle } from 'lucide-react';
+import { api } from '../services/api';
 
 export function WhatsappConnection() {
-    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
     const [status, setStatus] = useState<'DISCONNECTED' | 'CONNECTED' | 'QR_READY' | 'LOADING'>('LOADING');
     const [qrCode, setQrCode] = useState<string | null>(null);
     const [debugError, setDebugError] = useState<string>('');
@@ -10,16 +10,17 @@ export function WhatsappConnection() {
     useEffect(() => {
         const fetchStatus = async () => {
             try {
-                const response = await fetch(`${API_URL}/whatsapp/status`);
-                if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
-
-                const data = await response.json();
+                const data = await api.getWhatsappStatus();
 
                 setStatus(data.status);
                 setQrCode(data.qrCode);
                 setDebugError('');
             } catch (error: any) {
                 console.error("Failed to fetch status", error);
+
+                // If 401 (auth failed), likely session expired or invalid token. 
+                // api.ts logs a warning, but here we can show a friendlier message or nothing.
+
                 setStatus('DISCONNECTED');
                 setDebugError(error.message || 'Unknown Error');
             }

@@ -12,7 +12,7 @@ interface SettingsProps {
     onImportOrders: (orders: Order[]) => void;
 }
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+import { api } from '../services/api';
 
 export const Settings: React.FC<SettingsProps> = ({ settings, onSave, onLogout, onBackup, onRestore, onImportOrders }) => {
     const [formData, setFormData] = useState<StoreSettings>({
@@ -58,8 +58,7 @@ export const Settings: React.FC<SettingsProps> = ({ settings, onSave, onLogout, 
     React.useEffect(() => {
         const checkStatus = async () => {
             try {
-                const res = await fetch(`${API_URL}/whatsapp/status`);
-                const data = await res.json();
+                const data = await api.getWhatsappStatus();
                 if (data) {
                     setFormData(prev => ({ ...prev, whatsappStatus: data.status }));
                     setRealQr(data.qrCode);

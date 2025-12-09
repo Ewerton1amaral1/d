@@ -8,7 +8,7 @@ interface ProductManagementProps {
   setProducts: React.Dispatch<React.SetStateAction<Product[]>>;
 }
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+import { api } from '../services/api';
 
 export const ProductManagement: React.FC<ProductManagementProps> = ({ products, setProducts }) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -24,25 +24,18 @@ export const ProductManagement: React.FC<ProductManagementProps> = ({ products, 
     try {
       if (currentProduct.id) {
         // UPDATE
-        await fetch(`${API_URL}/products/${currentProduct.id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(currentProduct)
-        });
-        setProducts(prev => prev.map(p => p.id === currentProduct.id ? currentProduct as Product : p));
+        const updated = await api.updateProduct(currentProduct.id, currentProduct);
+        // If backend returns the updated object, use it. If not, use currentProduct.
+        // Assuming api returns the updated product.
+        const productToSet = updated.id ? updated : { ...currentProduct };
+        setProducts(prev => prev.map(p => p.id === currentProduct.id ? productToSet as Product : p));
       } else {
         // CREATE
-        const res = await fetch(`${API_URL}/products`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            ...currentProduct,
-            imageUrl: currentProduct.imageUrl || `https://picsum.photos/200/200?random=${Date.now()}`
-          })
+        const newProduct = await api.createProduct('', {
+          ...currentProduct,
+          imageUrl: currentProduct.imageUrl || `https://picsum.photos/200/200?random=${Date.now()}`
         });
-        const newProduct = await res.json();
 
-        // If backend returned the created product, use it (it has the correct DB ID)
         setProducts(prev => [...prev, newProduct]);
       }
       setIsEditing(false);
@@ -61,9 +54,7 @@ export const ProductManagement: React.FC<ProductManagementProps> = ({ products, 
   const confirmDelete = async () => {
     if (productToDelete) {
       try {
-        await fetch(`${API_URL}/products/${productToDelete}`, {
-          method: 'DELETE'
-        });
+        await api.deleteProduct(productToDelete);
         setProducts(prev => prev.filter(p => p.id !== productToDelete));
         setProductToDelete(null);
       } catch (error) {
