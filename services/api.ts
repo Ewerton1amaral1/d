@@ -1,4 +1,5 @@
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001/api";
+console.log("DEBUG: Current API_URL is:", API_URL);
 
 export const api = {
   // --- PRODUCTS ---
