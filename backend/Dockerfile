@@ -55,6 +55,7 @@ COPY --from=builder /app/backend/dist ./dist
 COPY --from=builder /app/backend/prisma ./prisma
 COPY --from=builder /app/backend/reset-admin.js ./
 COPY --from=builder /app/backend/diagnose_auth.js ./
+COPY --from=builder /app/backend/fix_admin_store.js ./
 
 EXPOSE 3001
 

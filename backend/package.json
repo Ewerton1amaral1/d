@@ -6,9 +6,10 @@
     "scripts": {
         "dev": "npx nodemon",
         "build": "npx prisma generate && tsc",
-        "start": "node dist/server.js",
+        "start": "npx prisma migrate deploy && node dist/server.js",
         "reset-admin": "node reset-admin.js",
         "diagnose-auth": "node diagnose_auth.js",
+        "fix-store": "node fix_admin_store.js",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "keywords": [],
