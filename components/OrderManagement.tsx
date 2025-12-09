@@ -8,7 +8,7 @@ interface OrderManagementProps {
   setOrders: React.Dispatch<React.SetStateAction<Order[]>>;
   settings?: StoreSettings;
   drivers?: Driver[];
-  onOpenWhatsAppSimulator?: () => void; // Added prop
+  // No simulator button
 }
 
 // -- SUB-COMPONENTS --
@@ -445,12 +445,7 @@ Link Maps: ${mapsUrl}`;
       <div className="flex justify-between mb-4 px-2 items-center">
         <div className="flex items-center gap-2">
           {/* WHATSAPP BOT BUTTON */}
-          <button
-            onClick={onOpenWhatsAppSimulator}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-bold transition bg-green-600 text-white hover:bg-green-700 shadow-sm"
-          >
-            <MessageCircle size={16} /> 🤖 Testar Bot WhatsApp
-          </button>
+
 
           {settings?.integrations?.ifoodEnabled && (
             <button

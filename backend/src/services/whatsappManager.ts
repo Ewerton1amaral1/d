@@ -103,6 +103,20 @@ export class WhatsappManager {
         return client;
     }
 
+    public async initializeAllSessions() {
+        console.log('[WhatsappManager] Restoring all sessions...');
+        const stores = await prisma.store.findMany({
+            where: { whatsappStatus: 'CONNECTED' }
+        });
+
+        for (const store of stores) {
+            console.log(`[WhatsappManager] Restoring session for store: ${store.id}`);
+            this.initializeStore(store.id).catch(err => {
+                console.error(`[WhatsappManager] Failed to restore session for ${store.id}`, err);
+            });
+        }
+    }
+
     public async resetStore(storeId: string) {
         console.log(`[WhatsappManager] Resetting store ${storeId}...`);
         const client = this.sessions.get(storeId);

@@ -55,8 +55,11 @@ app.use('/api/supplies', supplyRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/admin', adminRoutes);
 
+import { whatsappManager } from './services/whatsappManager';
+
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
+    whatsappManager.initializeAllSessions();
 });
 
 export default app;
