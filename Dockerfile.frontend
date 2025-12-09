@@ -3,6 +3,9 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+# Debug: List what files are available in the context
+RUN ls -la
+
 # Copy package files
 COPY package.json package-lock.json ./
 
