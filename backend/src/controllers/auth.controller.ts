@@ -23,6 +23,15 @@ export const login = async (req: Request, res: Response) => {
             return;
         }
 
+        // NEW: Check if Store is Active (Approval Flow)
+        if (user.role === 'STORE' && user.storeId) {
+            const store = await prisma.store.findUnique({ where: { id: user.storeId } });
+            if (store && !store.isActive) {
+                res.status(403).json({ error: 'Sua loja está aguardando aprovação do administrador.' });
+                return;
+            }
+        }
+
         // Generate token with storeId
         const token = jwt.sign(
             { userId: user.id, role: user.role, storeId: user.storeId },

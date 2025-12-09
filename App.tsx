@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { LoginScreen } from './components/LoginScreen';
-import { AdminPanel } from './components/AdminPanel';
+import { AdminDashboard } from './components/AdminDashboard';
 import { StoreApp } from './components/StoreApp';
 import { DigitalMenu } from './components/DigitalMenu';
 import { StoreSelector } from './components/StoreSelector';
@@ -10,7 +10,7 @@ import { UserSession } from './types';
 function App() {
   const [session, setSession] = useState<UserSession | null>(null);
   const [loading, setLoading] = useState(true);
-  
+
   // App View State
   const [viewMode, setViewMode] = useState<'LOGIN' | 'CLIENT_SELECTOR' | 'CLIENT_MENU'>('LOGIN');
   const [selectedStoreId, setSelectedStoreId] = useState<string | null>(null);
@@ -46,26 +46,26 @@ function App() {
     localStorage.removeItem('dm_session');
     setViewMode('LOGIN');
   };
-  
+
   // Client Flow Handlers
   const handleEnterClientMode = () => {
-      setViewMode('CLIENT_SELECTOR');
+    setViewMode('CLIENT_SELECTOR');
   };
 
   const handleSelectStore = (storeId: string) => {
-      setSelectedStoreId(storeId);
-      setViewMode('CLIENT_MENU');
+    setSelectedStoreId(storeId);
+    setViewMode('CLIENT_MENU');
   };
 
   const handleSwitchStore = () => {
-      // Clear URL params without refreshing to ensure we go back to the selector cleanly
-      window.history.pushState({}, '', window.location.pathname);
-      setSelectedStoreId(null);
-      setViewMode('CLIENT_SELECTOR');
+    // Clear URL params without refreshing to ensure we go back to the selector cleanly
+    window.history.pushState({}, '', window.location.pathname);
+    setSelectedStoreId(null);
+    setViewMode('CLIENT_SELECTOR');
   };
 
   const handleBackToLogin = () => {
-      setViewMode('LOGIN');
+    setViewMode('LOGIN');
   };
 
   if (loading) return null;
@@ -74,27 +74,27 @@ function App() {
 
   // 1. Logged In User (Admin or Manager)
   if (session) {
-    if (session.role === 'admin') {
-        return <AdminPanel onLogout={handleLogout} />;
+    if (session.role === 'ADMIN') {
+      return <AdminDashboard onLogout={handleLogout} />;
     }
-    if (session.role === 'store' && session.storeId) {
-        return <StoreApp storeId={session.storeId} onLogout={handleLogout} />;
+    if ((session.role === 'STORE' || session.role === 'store') && session.storeId) {
+      return <StoreApp storeId={session.storeId} onLogout={handleLogout} />;
     }
   }
 
   // 2. Client Mode: Menu View
   if (viewMode === 'CLIENT_MENU' && selectedStoreId) {
-      return (
-        <DigitalMenu 
-            storeId={selectedStoreId} 
-            onSwitchStore={handleSwitchStore}
-        />
-      );
+    return (
+      <DigitalMenu
+        storeId={selectedStoreId}
+        onSwitchStore={handleSwitchStore}
+      />
+    );
   }
 
   // 3. Client Mode: Store Selector
   if (viewMode === 'CLIENT_SELECTOR') {
-      return <StoreSelector onSelectStore={handleSelectStore} onBackToLogin={handleBackToLogin} />;
+    return <StoreSelector onSelectStore={handleSelectStore} onBackToLogin={handleBackToLogin} />;
   }
 
   // 4. Default: Login Screen (Portal)

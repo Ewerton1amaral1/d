@@ -36,6 +36,7 @@ import driverRoutes from './routes/driver.routes';
 import employeeRoutes from './routes/employee.routes';
 import supplyRoutes from './routes/supply.routes';
 import reportRoutes from './routes/report.routes';
+import adminRoutes from './routes/admin.routes';
 
 // Routes
 app.use('/api/products', productRoutes);
@@ -48,6 +49,7 @@ app.use('/api/drivers', driverRoutes);
 app.use('/api/employees', employeeRoutes);
 app.use('/api/supplies', supplyRoutes);
 app.use('/api/reports', reportRoutes);
+app.use('/api/admin', adminRoutes);
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);

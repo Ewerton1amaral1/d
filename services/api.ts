@@ -180,5 +180,18 @@ export const api = {
       body: JSON.stringify({ message }),
     });
     return res.json();
+  },
+
+  // --- ADMIN ---
+  async getAdminStores() {
+    const res = await authFetch(`${API_URL}/admin/stores`);
+    return res.json();
+  },
+  async toggleStoreStatus(storeId: string, isActive: boolean) {
+    const res = await authFetch(`${API_URL}/admin/stores/${storeId}/status`, {
+      method: "PUT",
+      body: JSON.stringify({ isActive }),
+    });
+    return res.json();
   }
 };

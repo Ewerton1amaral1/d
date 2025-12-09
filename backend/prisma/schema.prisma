@@ -57,6 +57,7 @@ model Store {
   logoUrl         String?
   contactPhone    String?
   isStoreOpen     Boolean  @default(true)
+  isActive        Boolean  @default(false)
   whatsappStatus  String?
   latitude        Float?   @default(-23.550520)
   longitude       Float?   @default(-46.633308)

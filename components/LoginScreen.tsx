@@ -69,7 +69,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, onEnterClient
             // Login Flow
             const res = await api.login({ username, password });
             onLogin({
-               role: 'store', // Assuming all backend logins are store for now (or check res.user.role)
+               role: res.user.role,
                storeId: res.user.storeId,
                storeName: res.user.username, // Backend might not send storeName on login, using username as fallback for now
                username: res.user.username,

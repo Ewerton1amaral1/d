@@ -202,7 +202,7 @@ export interface SupplyItem {
 }
 
 // AUTH & SAAS TYPES
-export type UserRole = 'admin' | 'store';
+export type UserRole = 'ADMIN' | 'STORE' | 'admin' | 'store';
 
 export interface UserSession {
   role: UserRole;
