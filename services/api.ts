@@ -41,6 +41,28 @@ const authFetch = async (url: string, options: RequestInit = {}) => {
 };
 
 export const api = {
+  // --- AUTH ---
+  async login(credentials: any) {
+    const res = await fetch(`${API_URL}/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(credentials),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Login failed');
+    return data;
+  },
+  async register(data: any) {
+    const res = await fetch(`${API_URL}/auth/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+    const resData = await res.json();
+    if (!res.ok) throw new Error(resData.error || 'Registration failed');
+    return resData;
+  },
+
   // --- PRODUCTS ---
   async getProducts(storeId?: string) {
     const query = storeId ? `?storeId=${storeId}` : '';

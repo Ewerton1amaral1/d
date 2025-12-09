@@ -209,6 +209,7 @@ export interface UserSession {
   storeId?: string; // Only for store role
   storeName?: string;
   username: string;
+  token?: string;
 }
 
 export interface StoreAccount {
