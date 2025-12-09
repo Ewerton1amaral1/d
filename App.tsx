@@ -34,6 +34,10 @@ function App() {
       setSession(JSON.parse(savedSession));
     }
     setLoading(false);
+
+    // VISUAL VERIFICATION
+    document.title = "Delivery Master v2.2 (Fix Applied)";
+    console.log("Frontend v2.2 Loaded - WhatsApp Fixes Applied");
   }, []);
 
   const handleLogin = (newSession: UserSession) => {

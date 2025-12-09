@@ -58,7 +58,7 @@ app.use('/api/admin', adminRoutes);
 import { whatsappManager } from './services/whatsappManager';
 
 app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+    console.log(`Server is running on port ${PORT} [Backend v2.2 - WhatsApp Auto-Init Fix]`);
     whatsappManager.initializeAllSessions();
 });
 
