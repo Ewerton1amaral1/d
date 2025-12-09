@@ -98,7 +98,20 @@ export function WhatsappConnection() {
                         <div className="text-center">
                             <AlertCircle className="w-12 h-12 text-amber-500 mx-auto mb-4 text-center" />
                             <p className="text-slate-600 mb-4">Serviço desconectado ou aguardando QR Code.</p>
-                            <p className="text-sm text-slate-400">Verifique se o backend está rodando.</p>
+                            <p className="text-sm text-slate-400 mb-6">Verifique se o backend está rodando.</p>
+                            <button
+                                onClick={async () => {
+                                    if (confirm('Isso vai reiniciar a sessão do WhatsApp. Continuar?')) {
+                                        try {
+                                            await api.resetWhatsapp();
+                                            window.location.reload();
+                                        } catch (e) { alert('Erro ao resetar'); }
+                                    }
+                                }}
+                                className="px-4 py-2 bg-red-100 text-red-700 rounded-lg text-sm font-medium hover:bg-red-200 transition-colors"
+                            >
+                                Forçar Reinício da Sessão
+                            </button>
                         </div>
                     )}
 

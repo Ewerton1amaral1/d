@@ -162,6 +162,9 @@ export class WhatsappManager {
 
     private async handleMessage(storeId: string, msg: WpMessage, client: Client) {
         try {
+            // Ignore status broadcasts
+            if (msg.from === 'status@broadcast') return;
+
             console.log(`[Store ${storeId}] Message from ${msg.from}: ${msg.body}`);
 
             // 1. Find or Create Chat
@@ -203,28 +206,40 @@ export class WhatsappManager {
             // 3. Bot Logic
             if (chat.botStatus === 'ACTIVE') {
                 let response = '';
-
                 const lowerBody = msg.body.toLowerCase().trim();
 
-                if (lowerBody.includes('oi') || lowerBody.includes('olá') || lowerBody.includes('ola') || lowerBody.includes('bot') || lowerBody.includes('menu') || lowerBody.includes('cardapio')) {
-                    response = `👋 Olá, *${contactName}*! Bem-vindo(a) ao atendimento automático.\n\nEscolha uma opção:\n\n1️⃣ *Ver Cardápio Digital*\n2️⃣ *Falar com Atendente*\n3️⃣ *Saber Horários*`;
-                } else if (lowerBody === '1' || lowerBody.includes('cardapio') || lowerBody.includes('pedido')) {
-                    // TODO: Replace with real dynamic link if possible, or generic
-                    response = `🍔 *Nosso Cardápio*: https://delivery-master-v2.vercel.app/menu?store=${storeId}\n\nFaça seu pedido por lá!`;
-                } else if (lowerBody === '2' || lowerBody.includes('atendente') || lowerBody.includes('humano')) {
-                    response = `🔔 Chamei um atendente para falar com você. Aguarde um instante!`;
+                // Initial Greeting
+                if (['oi', 'olá', 'ola', 'bot', 'menu', 'cardapio', 'iniciar', 'start'].some(w => lowerBody.includes(w))) {
+                    response = `👋 Olá, *${contactName}*! Bem-vindo(a) ao Delivery Master.\n\nComo posso ajudar hoje?\n\n1️⃣ *Ver Cardápio & Pedir*\n2️⃣ *Falar com Atendente*\n3️⃣ *Horários de Funcionamento*`;
+                }
+                // Option 1: Menu
+                else if (lowerBody === '1' || lowerBody.includes('pedido') || lowerBody.includes('fome')) {
+                    // Use a generic URL or specific if configured
+                    const menuUrl = `https://delivery-master-v2.vercel.app/menu?store=${storeId}`;
+                    response = `🍔 *Cardápio Digital*\n\nAcesse nosso cardápio e faça seu pedido online:\n${menuUrl}\n\nÉ rápido e fácil! 😋`;
+                }
+                // Option 2: Attendant
+                else if (lowerBody === '2' || lowerBody.includes('atendente') || lowerBody.includes('humano')) {
+                    response = `🔔 Entendido! Já notifiquei nossa equipe.\n\nUm atendente falará com você em instantes. O robô ficará pausado nesta conversa.`;
                     await prisma.chat.update({ where: { id: chat.id }, data: { botStatus: 'PAUSED' } });
-                } else if (lowerBody === '3' || lowerBody.includes('horario') || lowerBody.includes('horas')) {
-                    response = `🕒 Funcionamos todos os dias das 18h às 23h!`;
-                } else {
-                    response = `Desculpe, não entendi.\nDigite *Oi* para ver as opções.`;
+                }
+                // Option 3: Hours
+                else if (lowerBody === '3' || lowerBody.includes('horario') || lowerBody.includes('horas') || lowerBody.includes('aberto')) {
+                    response = `🕒 *Horário de Funcionamento*\n\nSegunda a Sexta: 18h às 23h\nSábado e Domingo: 18h às 00h`;
+                }
+                // Fallback (Only if it looks like a question or command, to avoid spamming on every sentence)
+                else if (lowerBody.length > 2) {
+                    response = `Desculpe, não entendi.\nDigite *Oi* para ver as opções do menu principal.`;
                 }
 
                 if (response) {
-                    // Send
+                    console.log(`[Store ${storeId}] Bot replying to ${fromJid}`);
+
+                    // Artificial delay for natural feel
+                    await new Promise(r => setTimeout(r, 1000));
+
                     await client.sendMessage(fromJid, response);
 
-                    // Save Outgoing Message
                     await prisma.message.create({
                         data: {
                             chatId: chat.id,
@@ -233,6 +248,8 @@ export class WhatsappManager {
                             timestamp: new Date()
                         }
                     });
+                } else {
+                    console.log(`[Store ${storeId}] Bot ignored message (no match)`);
                 }
             }
 

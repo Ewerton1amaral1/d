@@ -39,7 +39,7 @@ services:
       PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: "true"
     volumes:
       # CRITICAL: Persist WhatsApp Sessions
-      - whatsapp_sessions:/app/backend/.wwebjs_auth
+      - whatsapp_sessions:/app/.wwebjs_auth
     ports:
       - "3001:3001"
     networks:
