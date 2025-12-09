@@ -28,6 +28,8 @@ export class WhatsappManager {
         }
 
         console.log(`[WhatsappManager] Initializing session for store: ${storeId}`);
+        console.log(`[WhatsappManager] Using Executable Path: ${process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium-browser'}`);
+
         this.statuses.set(storeId, 'DISCONNECTED');
 
         const client = new Client({
@@ -43,7 +45,7 @@ export class WhatsappManager {
                     '--single-process', // <- This one is risky but saves memory. If it crashes, remove it.
                     '--disable-gpu'
                 ],
-                executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
+                executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium-browser',
             }
         });
 
