@@ -13,7 +13,11 @@ COPY backend/package.json ./backend/
 
 # Install dependencies from root (this installs everything including workspace deps)
 # We use --workspace=backend to install only backend deps + shared, but usually installing all is safer/easier
-RUN npm ci
+# Debug: List files to verify copy
+RUN ls -la
+RUN ls -la backend
+# Use npm install instead of npm ci to be more robust against lockfile mismatches
+RUN npm install
 
 WORKDIR /app/backend
 
