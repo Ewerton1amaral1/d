@@ -34,7 +34,7 @@ export const createDriver = async (req: Request, res: Response) => {
                 phone,
                 plate,
                 pixKey,
-                dailyRate: dailyRate ? parseFloat(dailyRate) : null,
+                dailyRate: dailyRate !== undefined && dailyRate !== null ? Number(dailyRate) : null,
                 isActive: true
             }
         });

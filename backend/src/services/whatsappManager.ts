@@ -149,19 +149,18 @@ export class WhatsappManager {
 
                 const lowerBody = msg.body.toLowerCase().trim();
 
-                if (lowerBody === 'oi' || lowerBody === 'olá' || lowerBody === 'ola' || lowerBody === 'bot') {
+                if (lowerBody.includes('oi') || lowerBody.includes('olá') || lowerBody.includes('ola') || lowerBody.includes('bot') || lowerBody.includes('menu') || lowerBody.includes('cardapio')) {
                     response = `👋 Olá, *${contactName}*! Bem-vindo(a) ao atendimento automático.\n\nEscolha uma opção:\n\n1️⃣ *Ver Cardápio Digital*\n2️⃣ *Falar com Atendente*\n3️⃣ *Saber Horários*`;
-                } else if (lowerBody === '1') {
+                } else if (lowerBody === '1' || lowerBody.includes('cardapio') || lowerBody.includes('pedido')) {
                     // TODO: Replace with real dynamic link if possible, or generic
                     response = `🍔 *Nosso Cardápio*: https://delivery-master-v2.vercel.app/menu?store=${storeId}\n\nFaça seu pedido por lá!`;
-                } else if (lowerBody === '2') {
+                } else if (lowerBody === '2' || lowerBody.includes('atendente') || lowerBody.includes('humano')) {
                     response = `🔔 Chamei um atendente para falar com você. Aguarde um instante!`;
                     await prisma.chat.update({ where: { id: chat.id }, data: { botStatus: 'PAUSED' } });
-                } else if (lowerBody === '3') {
+                } else if (lowerBody === '3' || lowerBody.includes('horario') || lowerBody.includes('horas')) {
                     response = `🕒 Funcionamos todos os dias das 18h às 23h!`;
                 } else {
-                    // Default fallback for unknown commands (optional: or stay silent)
-                    // response = `Desculpe, não entendi. Digite *Oi* para ver o menu.`;
+                    response = `Desculpe, não entendi.\nDigite *Oi* para ver as opções.`;
                 }
 
                 if (response) {
