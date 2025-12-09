@@ -8,6 +8,7 @@
         "build": "npx prisma generate && tsc",
         "start": "node dist/server.js",
         "reset-admin": "node reset-admin.js",
+        "diagnose-auth": "node diagnose_auth.js",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "keywords": [],
