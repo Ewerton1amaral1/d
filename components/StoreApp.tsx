@@ -22,6 +22,8 @@ import {
   DoorClosed
 } from 'lucide-react';
 
+import { api } from '../services/api';
+
 import { Dashboard } from './Dashboard';
 import { ClientManagement } from './ClientManagement';
 import { ProductManagement } from './ProductManagement';
@@ -141,29 +143,30 @@ export const StoreApp: React.FC<StoreAppProps> = ({ storeId, onLogout }) => {
   }, [clients, storeId]);
 
   // --- SYNC WITH BACKEND ---
+  // ... [existing imports]
+
+  // Inside the component...
+
+  // --- SYNC WITH BACKEND ---
   useEffect(() => {
     const fetchData = () => {
       // 1. Fetch Products
-      fetch(`${API_URL}/products`)
-        .then(res => res.json())
+      api.getProducts()
         .then(data => { if (Array.isArray(data)) setProducts(data); })
         .catch(err => console.error('Failed to sync products', err));
 
       // 2. Fetch Orders
-      fetch(`${API_URL}/orders`)
-        .then(res => res.json())
+      api.getOrders()
         .then(data => { if (Array.isArray(data)) setOrders(data); })
         .catch(err => console.error('Failed to sync orders', err));
 
       // 3. Fetch Settings
-      fetch(`${API_URL}/settings`)
-        .then(res => res.json())
+      api.getSettings()
         .then(data => { if (data && data.id) setStoreSettings(data); })
         .catch(err => console.error('Failed to sync settings', err));
 
       // 4. Fetch Clients
-      fetch(`${API_URL}/clients`)
-        .then(res => res.json())
+      api.getClients()
         .then(data => {
           if (Array.isArray(data)) {
             const mapped = data.map((c: any) => ({
@@ -176,20 +179,17 @@ export const StoreApp: React.FC<StoreAppProps> = ({ storeId, onLogout }) => {
         .catch(err => console.error('Failed to sync clients', err));
 
       // 5. Fetch Drivers
-      fetch(`${API_URL}/drivers`)
-        .then(res => res.json())
+      api.getDrivers()
         .then(data => { if (Array.isArray(data)) setDrivers(data); })
         .catch(err => console.error('Failed to sync drivers', err));
 
       // 6. Fetch Employees (Team)
-      fetch(`${API_URL}/employees`)
-        .then(res => res.json())
+      api.getEmployees()
         .then(data => { if (Array.isArray(data)) setEmployees(data); })
         .catch(err => console.error('Failed to sync employees', err));
 
       // 7. Fetch Supplies (Inventory)
-      fetch(`${API_URL}/supplies`)
-        .then(res => res.json())
+      api.getSupplies()
         .then(data => { if (Array.isArray(data)) setSupplies(data); })
         .catch(err => console.error('Failed to sync supplies', err));
     };
