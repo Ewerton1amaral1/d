@@ -275,6 +275,11 @@ export const api = {
     if (!res.ok) throw new Error('Failed to fetch whatsapp status');
     return res.json();
   },
+  async resetWhatsapp() {
+    const res = await authFetch(`${API_URL}/whatsapp/reset`, { method: 'POST' });
+    if (!res.ok) throw new Error('Failed to reset whatsapp');
+    return res.json();
+  },
   async getChats() {
     const res = await authFetch(`${API_URL}/whatsapp/chats`);
     if (!res.ok) throw new Error('Failed to fetch chats');
