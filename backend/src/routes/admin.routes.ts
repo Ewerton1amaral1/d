@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { listStores, toggleStoreStatus } from '../controllers/admin.controller';
-import { authMiddleware } from '../middlewares/auth';
+import { authMiddleware } from '../middlewares/authMiddleware';
 
 const router = Router();
 
