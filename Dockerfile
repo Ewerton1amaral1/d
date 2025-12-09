@@ -1,69 +1,40 @@
 # Build Stage
 FROM node:20-alpine AS builder
 
-# Prevent puppeteer from downloading chrome during npm install
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
-
 WORKDIR /app
 
-# Install build tools needed for some npm packages
-RUN apk add --no-cache python3 make g++
-
-# Copy root package files first to leverage caching
+# Copy root package files
 COPY package.json package-lock.json ./
-# Copy backend package file
+# Copy backend package too if needed for workspace, but we just want root deps for now
+# Actually root package.json has "workspaces": ["backend"] which might complicate npm install if backend missing
+# Let's verify if we need backend folder. Usually yes if workspace.
 COPY backend/package.json ./backend/
 
-# Debug: List files to verify copy
-RUN ls -la
-RUN ls -la backend
-# Use npm install instead of npm ci to be more robust against lockfile mismatches
+# Install dependencies (including devDependencies for Vite)
 RUN npm install
 
-WORKDIR /app/backend
+# Copy source code
+COPY . .
 
-COPY backend/prisma ./prisma/
-RUN npx prisma generate
-
-COPY backend/. .
-
+# Build the frontend
 RUN npm run build
 
-# Production Stage
-FROM node:20-alpine AS runner
+# Production Stage (Nginx)
+FROM nginx:alpine
 
-WORKDIR /app
+# Copy built assets from builder
+COPY --from=builder /app/dist /usr/share/nginx/html
 
-ENV NODE_ENV=production
+# Add custom nginx config to handle React Router (SPA)
+RUN echo 'server { \
+    listen 80; \
+    location / { \
+    root /usr/share/nginx/html; \
+    index index.html index.htm; \
+    try_files $uri $uri/ /index.html; \
+    } \
+    }' > /etc/nginx/conf.d/default.conf
 
-# Install Chrome dependencies for Puppeteer
-# Added glib and eudev to fix missing shared library errors
-RUN apk add --no-cache \
-    chromium \
-    nss \
-    freetype \
-    harfbuzz \
-    ca-certificates \
-    ttf-freefont \
-    nodejs \
-    yarn \
-    glib \
-    eudev
+EXPOSE 80
 
-# Tell Puppeteer to skip downloading Chrome. We'll use the installed package.
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
-    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
-
-# Copy necessary files from builder
-# Note: node_modules structure might be different in monorepo, usually hoisted to root
-COPY --from=builder /app/node_modules ./node_modules
-# Also copy backend specific modules if any (though usually hoist)
-# COPY --from=builder /app/backend/node_modules ./backend/node_modules
-
-COPY --from=builder /app/backend/package.json ./
-COPY --from=builder /app/backend/dist ./dist
-COPY --from=builder /app/backend/prisma ./prisma
-
-EXPOSE 3001
-
-CMD ["npm", "run", "start"]
+CMD ["nginx", "-g", "daemon off;"]
