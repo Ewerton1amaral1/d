@@ -7,7 +7,7 @@
         "dev": "npx nodemon",
         "build": "npx prisma generate && tsc",
         "start": "node dist/server.js",
-        "reset-admin": "ts-node prisma/reset_admin.ts",
+        "reset-admin": "node reset-admin.js",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "keywords": [],
