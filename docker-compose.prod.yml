@@ -1,0 +1,71 @@
+version: '3.8'
+
+services:
+  # 1. Database Service (Postgres)
+  db:
+    image: postgres:15-alpine
+    container_name: deliverymaster_db
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin_password_secure_123 # Change this in production!
+      POSTGRES_DB: deliverymaster
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app_network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U admin -d deliverymaster" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # 2. Backend Service (Node.js API + WhatsApp Bot)
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: deliverymaster_backend
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://admin:admin_password_secure_123@db:5432/deliverymaster?schema=public
+      PORT: 3001
+      JWT_SECRET: super_secret_jwt_key_change_me
+      # Puppeteer Config
+      PUPPETEER_EXECUTABLE_PATH: /usr/bin/chromium
+      PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: "true"
+    volumes:
+      # CRITICAL: Persist WhatsApp Sessions
+      - whatsapp_sessions:/app/backend/.wwebjs_auth
+    ports:
+      - "3001:3001"
+    networks:
+      - app_network
+
+  # 3. Frontend Service (React/Vite)
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: deliverymaster_frontend
+    restart: always
+    depends_on:
+      - backend
+    environment:
+      VITE_API_URL: http://YOUR_VPS_IP:3001 # User will need to replace this
+    ports:
+      - "80:80"
+    networks:
+      - app_network
+
+volumes:
+  postgres_data:
+  whatsapp_sessions:
+    # This ensures WhatsApp stays connected even after updates!
+
+networks:
+  app_network:
+    driver: bridge
