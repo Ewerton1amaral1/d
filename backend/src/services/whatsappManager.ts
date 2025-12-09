@@ -43,9 +43,15 @@ export class WhatsappManager {
                     '--disable-accelerated-2d-canvas',
                     '--no-first-run',
                     '--no-zygote',
-                    '--disable-gpu'
+                    '--disable-gpu',
+                    '--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36'
                 ],
                 executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium',
+            },
+            // Fix for Loading Issues
+            webVersionCache: {
+                type: 'remote',
+                remotePath: 'https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.2412.54.html',
             }
         });
 
@@ -74,12 +80,23 @@ export class WhatsappManager {
             });
         });
 
-        client.on('message', async (msg) => {
-            console.log(`[Store ${storeId}] Raw message received from ${msg.from}: ${msg.body}`);
+        client.on('message_create', async (msg) => {
+            // handle both message and message_create (for self messages)
             if (msg.from === 'status@broadcast') return;
-            if (msg.fromMe) return;
+
+            // Allow debugging from self if starts with #debug
+            if (msg.fromMe && !msg.body.startsWith('#debug')) return;
+
+            console.log(`[Store ${storeId}] Message processed: ${msg.body} from ${msg.from}`);
             this.handleMessage(storeId, msg, client);
         });
+
+        // Remove old 'message' listener to avoid double processing if we use 'message_create'
+        // Actually, 'message' is for incoming, 'message_create' is for ALL (inc. sent by us).
+        // Let's stick to 'message' for incoming, but if we want to debug self, we need 'message_create'.
+        // For safety/standard usage, I will replace 'message' with logic inside 'message_create' or just keep 'message' and add 'message_create' for debug check?
+        // Better: Use 'message_create' which captures EVERYTHING, and filter.
+
 
         client.on('disconnected', async (reason) => {
             console.log(`[Store ${storeId}] Disconnected:`, reason);
