@@ -92,12 +92,24 @@ export class WhatsappManager {
             this.qrCodes.delete(storeId);
         });
 
+        client.on('auth_failure', async (msg) => {
+            console.error(`[Store ${storeId}] Auth Failure:`, msg);
+            this.statuses.set(storeId, 'DISCONNECTED');
+            await prisma.store.update({
+                where: { id: storeId },
+                data: { whatsappStatus: 'DISCONNECTED' }
+            });
+            // Should destroy to clean up
+            this.sessions.delete(storeId);
+        });
+
         try {
             await client.initialize();
         } catch (error) {
             console.error(`[Store ${storeId}] Failed to initialize client`, error);
             this.sessions.delete(storeId); // Allow retry
             this.statuses.set(storeId, 'DISCONNECTED');
+            await prisma.store.update({ where: { id: storeId }, data: { whatsappStatus: 'DISCONNECTED' } });
         }
 
         return client;
