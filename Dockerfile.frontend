@@ -15,6 +15,10 @@ RUN npm install
 # Copy all files (including frontend source)
 COPY . .
 
+# Expose the API URL to the build process
+ARG VITE_API_URL
+ENV VITE_API_URL=$VITE_API_URL
+
 # Build the frontend (Vite build -> dist folder)
 RUN npm run build
 
