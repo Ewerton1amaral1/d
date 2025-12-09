@@ -148,6 +148,19 @@ export const api = {
     });
     return res.json();
   },
+  async updateDriver(id: string, updates: any) {
+    const res = await authFetch(`${API_URL}/drivers/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(updates),
+    });
+    return res.json();
+  },
+  async deleteDriver(id: string) {
+    const res = await authFetch(`${API_URL}/drivers/${id}`, {
+      method: "DELETE",
+    });
+    return res.json();
+  },
 
   // --- EMPLOYEES ---
   async getEmployees() {
@@ -178,6 +191,12 @@ export const api = {
     const res = await authFetch(`${API_URL}/whatsapp/chats/${chatId}/messages`, {
       method: "POST",
       body: JSON.stringify({ message }),
+    });
+    return res.json();
+  },
+  async deleteMessage(messageId: string) {
+    const res = await authFetch(`${API_URL}/whatsapp/messages/${messageId}`, {
+      method: "DELETE",
     });
     return res.json();
   },

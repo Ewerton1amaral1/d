@@ -17,7 +17,7 @@ interface Chat {
     messages: Message[];
 }
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+import { api } from '../services/api';
 
 export function LiveChat() {
     const [chats, setChats] = useState<Chat[]>([]);
@@ -28,8 +28,7 @@ export function LiveChat() {
 
     // Fetch Chats
     useEffect(() => {
-        fetch(`${API_URL}/whatsapp/chats`)
-            .then(res => res.json())
+        api.getChats()
             .then(data => setChats(data))
             .catch(err => console.error(err));
 
@@ -44,8 +43,7 @@ export function LiveChat() {
     useEffect(() => {
         if (!selectedChatId) return;
 
-        fetch(`${API_URL}/whatsapp/chats/${selectedChatId}/messages`)
-            .then(res => res.json())
+        api.getMessages(selectedChatId)
             .then(data => setMessages(data))
             .catch(err => console.error(err));
     }, [selectedChatId, refreshTrigger]); // Auto-refresh messages too 
@@ -55,11 +53,7 @@ export function LiveChat() {
         if (!selectedChatId || !newMessage.trim()) return;
 
         try {
-            await fetch(`${API_URL}/whatsapp/chats/${selectedChatId}/messages`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: newMessage })
-            });
+            await api.sendMessage(selectedChatId, newMessage);
 
             setNewMessage('');
             setRefreshTrigger(prev => prev + 1); // Refresh UI
@@ -71,7 +65,7 @@ export function LiveChat() {
     const handleDeleteMessage = async (msgId: string) => {
         if (!confirm('Apagar esta mensagem?')) return;
         try {
-            await fetch(`${API_URL}/whatsapp/messages/${msgId}`, { method: 'DELETE' });
+            await api.deleteMessage(msgId);
             // Remove from local state immediately
             setMessages(prev => prev.filter(m => m.id !== msgId));
         } catch (error) {

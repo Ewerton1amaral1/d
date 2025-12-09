@@ -10,7 +10,7 @@ interface DriverManagementProps {
    setOrders: React.Dispatch<React.SetStateAction<Order[]>>;
 }
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+import { api } from '../services/api';
 
 export const DriverManagement: React.FC<DriverManagementProps> = ({ drivers, setDrivers, orders, setOrders }) => {
    const [activeTab, setActiveTab] = useState<'team' | 'finance'>('team');
@@ -33,31 +33,23 @@ export const DriverManagement: React.FC<DriverManagementProps> = ({ drivers, set
 
       try {
          const isUpdate = !!currentDriver.id;
-         const method = isUpdate ? 'PUT' : 'POST';
-         const url = isUpdate
-            ? `${API_URL}/drivers/${currentDriver.id}`
-            : `${API_URL}/drivers`;
+         let saved;
 
-         const res = await fetch(url, {
-            method,
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(currentDriver)
-         });
-
-         if (res.ok) {
-            const saved = await res.json();
-            setDrivers(prev => isUpdate
-               ? prev.map(d => d.id === saved.id ? saved : d)
-               : [...prev, saved]
-            );
-            setIsEditing(false);
-            setCurrentDriver({});
+         if (isUpdate) {
+            saved = await api.updateDriver(currentDriver.id!, currentDriver);
          } else {
-            alert("Erro ao salvar entregador no servidor.");
+            saved = await api.createDriver('', currentDriver);
          }
+
+         setDrivers(prev => isUpdate
+            ? prev.map(d => d.id === saved.id ? saved : d)
+            : [...prev, saved]
+         );
+         setIsEditing(false);
+         setCurrentDriver({});
       } catch (error) {
          console.error(error);
-         alert("Erro de conexão ao salvar entregador.");
+         alert("Erro ao salvar entregador.");
       }
    };
 
@@ -69,15 +61,11 @@ export const DriverManagement: React.FC<DriverManagementProps> = ({ drivers, set
    const confirmDelete = async () => {
       if (driverToDelete) {
          try {
-            const res = await fetch(`${API_URL}/drivers/${driverToDelete}`, { method: 'DELETE' });
-            if (res.ok) {
-               setDrivers(prev => prev.filter(d => d.id !== driverToDelete));
-               setDriverToDelete(null);
-            } else {
-               alert("Erro ao excluir entregador.");
-            }
+            await api.deleteDriver(driverToDelete);
+            setDrivers(prev => prev.filter(d => d.id !== driverToDelete));
+            setDriverToDelete(null);
          } catch (e) {
-            alert("Erro de conexão ao excluir.");
+            alert("Erro ao excluir entregar.");
          }
       }
    };

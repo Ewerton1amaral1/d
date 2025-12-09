@@ -35,6 +35,7 @@ export class WhatsappManager {
         const client = new Client({
             authStrategy: new LocalAuth({ clientId: storeId }), // Saves to .wwebjs_auth/session-<storeId>
             puppeteer: {
+                headless: true,
                 args: [
                     '--no-sandbox',
                     '--disable-setuid-sandbox',
@@ -42,7 +43,6 @@ export class WhatsappManager {
                     '--disable-accelerated-2d-canvas',
                     '--no-first-run',
                     '--no-zygote',
-                    '--single-process', // <- This one is risky but saves memory. If it crashes, remove it.
                     '--disable-gpu'
                 ],
                 executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium-browser',
@@ -86,14 +86,16 @@ export class WhatsappManager {
                 where: { id: storeId },
                 data: { whatsappStatus: 'DISCONNECTED' }
             });
-            // Optional: Auto-reconnect or destroy
-            // this.sessions.delete(storeId);
+            this.sessions.delete(storeId);
+            this.qrCodes.delete(storeId);
         });
 
         try {
             await client.initialize();
         } catch (error) {
             console.error(`[Store ${storeId}] Failed to initialize client`, error);
+            this.sessions.delete(storeId); // Allow retry
+            this.statuses.set(storeId, 'DISCONNECTED');
         }
 
         return client;
