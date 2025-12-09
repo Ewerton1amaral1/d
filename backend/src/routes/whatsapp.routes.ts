@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getStatus, getChats, getMessages, sendMessage } from '../controllers/whatsapp.controller';
+import { getStatus, getChats, getMessages, sendMessage, resetSession } from '../controllers/whatsapp.controller';
 import { authMiddleware } from '../middlewares/authMiddleware';
 
 const router = Router();
@@ -7,6 +7,7 @@ const router = Router();
 router.use(authMiddleware);
 
 router.get('/status', getStatus);
+router.post('/reset', resetSession); // Added Reset
 router.get('/chats', getChats);
 router.get('/chats/:id/messages', getMessages);
 router.post('/chats/:id/messages', sendMessage);

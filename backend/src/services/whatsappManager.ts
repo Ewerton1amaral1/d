@@ -103,6 +103,25 @@ export class WhatsappManager {
         return client;
     }
 
+    public async resetStore(storeId: string) {
+        console.log(`[WhatsappManager] Resetting store ${storeId}...`);
+        const client = this.sessions.get(storeId);
+        if (client) {
+            try {
+                await client.destroy();
+            } catch (e) {
+                console.error(`[WhatsappManager] Error destroying client for ${storeId}`, e);
+            }
+        }
+        this.sessions.delete(storeId);
+        this.qrCodes.delete(storeId);
+        this.statuses.set(storeId, 'DISCONNECTED');
+        await prisma.store.update({ where: { id: storeId }, data: { whatsappStatus: 'DISCONNECTED' } });
+
+        // Re-init immediately
+        this.initializeStore(storeId);
+    }
+
     private async handleMessage(storeId: string, msg: WpMessage, client: Client) {
         try {
             console.log(`[Store ${storeId}] Message from ${msg.from}: ${msg.body}`);

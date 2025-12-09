@@ -16,6 +16,20 @@ export const getStatus = (req: Request, res: Response) => {
     res.json(whatsappManager.getStatus(storeId));
 };
 
+export const resetSession = async (req: Request, res: Response) => {
+    // @ts-ignore
+    const storeId = req.user?.storeId;
+    console.log(`[WhatsAppController] Reset requested for store ${storeId}`);
+
+    try {
+        await whatsappManager.resetStore(storeId);
+        res.json({ success: true, message: 'Session reset initiated' });
+    } catch (error) {
+        console.error('Reset failed', error);
+        res.status(500).json({ error: 'Failed to reset session' });
+    }
+};
+
 export const getChats = async (req: Request, res: Response) => {
     try {
         // @ts-ignore
