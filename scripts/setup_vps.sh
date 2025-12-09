@@ -9,6 +9,19 @@ echo "🚀 Iniciando Configuração do Servidor VPS..."
 echo "📦 Atualizando sistema..."
 sudo apt-get update && sudo apt-get upgrade -y
 
+# 1.5 Setup Swap (Vital for 1GB RAM Servers)
+echo "💾 Configurando Memória Swap (2GB)..."
+if [ ! -f /swapfile ]; then
+    sudo fallocate -l 2G /swapfile
+    sudo chmod 600 /swapfile
+    sudo mkswap /swapfile
+    sudo swapon /swapfile
+    echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+    echo "✅ Swap criado com sucesso!"
+else
+    echo "✅ Swap já existe."
+fi
+
 # 2. Install Essentials
 echo "🛠️ Instalando ferramentas essenciais (Git, Curl)..."
 sudo apt-get install -y git curl apt-transport-https ca-certificates software-properties-common
