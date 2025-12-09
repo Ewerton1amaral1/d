@@ -8,7 +8,7 @@ interface TeamManagementProps {
    setEmployees: React.Dispatch<React.SetStateAction<Employee[]>>;
 }
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+import { api } from '../services/api';
 
 export const TeamManagement: React.FC<TeamManagementProps> = ({ employees, setEmployees }) => {
    const [isEditing, setIsEditing] = useState(false);
@@ -27,33 +27,20 @@ export const TeamManagement: React.FC<TeamManagementProps> = ({ employees, setEm
       }
 
       try {
-         const isUpdate = !!currentEmployee.id;
-         const method = isUpdate ? 'PUT' : 'POST';
-         const url = isUpdate
-            ? `${API_URL}/employees/${currentEmployee.id}`
-            : `${API_URL}/employees`;
-
-         const res = await fetch(url, {
-            method,
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(currentEmployee)
-         });
-
-         if (res.ok) {
-            const saved = await res.json();
-            setEmployees(prev => isUpdate
-               ? prev.map(e => e.id === saved.id ? saved : e)
-               : [...prev, saved]
-            );
-            setIsEditing(false);
-            setCurrentEmployee({});
-            setActiveSubTab('info');
+         if (currentEmployee.id) {
+            const saved = await api.updateEmployee(currentEmployee.id, currentEmployee);
+            setEmployees(prev => prev.map(e => e.id === saved.id ? saved : e));
          } else {
-            alert("Erro ao salvar colaborador no servidor.");
+            const saved = await api.createEmployee(currentEmployee);
+            setEmployees(prev => [...prev, saved]);
          }
+
+         setIsEditing(false);
+         setCurrentEmployee({});
+         setActiveSubTab('info');
       } catch (error) {
          console.error(error);
-         alert("Erro de conexão.");
+         alert("Erro ao salvar colaborador. Verifique a conexão.");
       }
    };
 
@@ -65,15 +52,11 @@ export const TeamManagement: React.FC<TeamManagementProps> = ({ employees, setEm
    const confirmDelete = async () => {
       if (employeeToDelete) {
          try {
-            const res = await fetch(`${API_URL}/employees/${employeeToDelete}`, { method: 'DELETE' });
-            if (res.ok) {
-               setEmployees(prev => prev.filter(e => e.id !== employeeToDelete));
-               setEmployeeToDelete(null);
-            } else {
-               alert("Erro ao excluir colaborador.");
-            }
+            await api.deleteEmployee(employeeToDelete);
+            setEmployees(prev => prev.filter(e => e.id !== employeeToDelete));
+            setEmployeeToDelete(null);
          } catch (e) {
-            alert("Erro de conexão ao excluir.");
+            alert("Erro ao excluir colaborador.");
          }
       }
    };
@@ -90,26 +73,20 @@ export const TeamManagement: React.FC<TeamManagementProps> = ({ employees, setEm
       }
 
       try {
-         const res = await fetch(`${API_URL}/employees/${currentEmployee.id}/advances`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ amount: newAdvance.amount, description: newAdvance.desc || 'Adiantamento' })
+         const savedAdv = await api.addEmployeeAdvance(currentEmployee.id, {
+            amount: newAdvance.amount,
+            description: newAdvance.desc || 'Adiantamento'
          });
 
-         if (res.ok) {
-            const savedAdv = await res.json();
-            const updatedAdvances = [...(currentEmployee.advances || []), savedAdv];
-            setCurrentEmployee({ ...currentEmployee, advances: updatedAdvances });
+         const updatedAdvances = [...(currentEmployee.advances || []), savedAdv];
+         setCurrentEmployee({ ...currentEmployee, advances: updatedAdvances });
 
-            // Update main list reflection
-            setEmployees(prev => prev.map(e => e.id === currentEmployee.id ? { ...e, advances: updatedAdvances } : e));
+         // Update main list reflection
+         setEmployees(prev => prev.map(e => e.id === currentEmployee.id ? { ...e, advances: updatedAdvances } : e));
 
-            setNewAdvance({ amount: '', desc: '' });
-         } else {
-            alert("Erro ao registrar vale.");
-         }
+         setNewAdvance({ amount: '', desc: '' });
       } catch (e) {
-         alert("Erro de conexão.");
+         alert("Erro ao registrar vale.");
       }
    };
 

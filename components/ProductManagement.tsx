@@ -25,9 +25,7 @@ export const ProductManagement: React.FC<ProductManagementProps> = ({ products, 
       if (currentProduct.id) {
         // UPDATE
         const updated = await api.updateProduct(currentProduct.id, currentProduct);
-        // If backend returns the updated object, use it. If not, use currentProduct.
-        // Assuming api returns the updated product.
-        const productToSet = updated.id ? updated : { ...currentProduct };
+        const productToSet = updated.id ? updated : { ...currentProduct }; // Fallback safety
         setProducts(prev => prev.map(p => p.id === currentProduct.id ? productToSet as Product : p));
       } else {
         // CREATE
@@ -42,7 +40,7 @@ export const ProductManagement: React.FC<ProductManagementProps> = ({ products, 
       setCurrentProduct({});
     } catch (error) {
       console.error('Failed to save product', error);
-      alert('Erro ao salvar produto no servidor.');
+      alert('Erro ao salvar produto. Verifique sua conexão.');
     }
   };
 

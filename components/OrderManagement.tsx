@@ -58,7 +58,7 @@ const SourceBadge = ({ source }: { source: OrderSource }) => {
 
 // -- MAIN COMPONENT --
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+import { api } from '../services/api';
 
 export const OrderManagement: React.FC<OrderManagementProps> = ({ orders, setOrders, settings, drivers, onOpenWhatsAppSimulator }) => {
   const [showCancelled, setShowCancelled] = useState(false);
@@ -85,13 +85,10 @@ export const OrderManagement: React.FC<OrderManagementProps> = ({ orders, setOrd
     setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: newStatus, updatedAt: new Date().toISOString() } : o));
 
     // 2. Persist to Backend
-    fetch(`${API_URL}/orders/${orderId}/status`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: newStatus })
-    }).catch(err => {
+    api.updateOrderStatus(orderId, newStatus).catch(err => {
       console.error("Failed to update status", err);
-      alert("Falha ao atualizar status no servidor. Verifique a conexão.");
+      alert("Falha ao atualizar status. Verifique a conexão.");
+      // Revert optimistic update? For now keep it simple.
     });
 
     // 3. Logic to trigger WhatsApp Modal when moving to DELIVERING
@@ -132,7 +129,15 @@ export const OrderManagement: React.FC<OrderManagementProps> = ({ orders, setOrd
 
   const assignDriver = (orderId: string, driverId: string) => {
     const driver = drivers?.find(d => d.id === driverId);
+
+    // Optimistic Update
     setOrders(prev => prev.map(o => o.id === orderId ? { ...o, driverId, driverName: driver?.name, updatedAt: new Date().toISOString() } : o));
+
+    // Persist
+    api.updateOrder('', orderId, { driverId }).catch(e => {
+      console.error("Failed to assign driver", e);
+      alert("Falha ao atribuir entregador.");
+    });
   };
 
   const simulateSync = () => {

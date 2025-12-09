@@ -8,7 +8,7 @@ interface ClientManagementProps {
   setClients: React.Dispatch<React.SetStateAction<Client[]>>;
 }
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+import { api } from '../services/api';
 
 export const ClientManagement: React.FC<ClientManagementProps> = ({ clients, setClients }) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -25,38 +25,34 @@ export const ClientManagement: React.FC<ClientManagementProps> = ({ clients, set
     }
 
     try {
-      const isUpdate = !!currentClient.id;
-      const url = isUpdate
-        ? `${API_URL}/clients/${currentClient.id}`
-        : `${API_URL}/clients`;
+      if (currentClient.id) {
+        // UPDATE
+        const updated = await api.updateClient(currentClient.id, currentClient);
 
-      const res = await fetch(url, {
-        method: isUpdate ? 'PUT' : 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(currentClient)
-      });
+        // Map Backend Address format to Frontend
+        const mappedClient = {
+          ...updated,
+          address: updated.addresses && updated.addresses.length > 0 ? updated.addresses[0] : {}
+        };
 
-      if (res.ok) {
-        const saved = await res.json();
+        setClients(prev => prev.map(c => c.id === mappedClient.id ? mappedClient : c));
+      } else {
+        // CREATE
+        const saved = await api.createClient('', currentClient);
+
         // Map Backend Address format to Frontend
         const mappedClient = {
           ...saved,
           address: saved.addresses && saved.addresses.length > 0 ? saved.addresses[0] : {}
         };
 
-        setClients(prev => isUpdate
-          ? prev.map(c => c.id === mappedClient.id ? mappedClient : c)
-          : [...prev, mappedClient]
-        );
-
-        setIsEditing(false);
-        setCurrentClient({});
-      } else {
-        alert("Erro ao salvar cliente no servidor.");
+        setClients(prev => [...prev, mappedClient]);
       }
+      setIsEditing(false);
+      setCurrentClient({});
     } catch (error) {
       console.error("Save error", error);
-      alert("Erro de conexão ao salvar.");
+      alert("Erro ao salvar cliente. Verifique a conexão.");
     }
   };
 
@@ -68,22 +64,7 @@ export const ClientManagement: React.FC<ClientManagementProps> = ({ clients, set
   const confirmDelete = async () => {
     if (clientToDelete) {
       try {
-        // Note: Delete API might not be implemented in controller yet? 
-        // Checking controller... it's not. 
-        // But I'll implement the Frontend call and then check controller.
-        // Wait, user didn't ask for Delete features, but existing UI has it.
-        // I should verify if Delete exists. 
-        // Step 1056 view of client.controller.ts showed NO deleteClient export.
-        // So Delete will fail. 
-        // I will ONLY implement local delete for now OR implement backend delete.
-        // User asked "aba cadastro está com bug". 
-        // Implementing Delete is "extra" if not requested, but good for completeness.
-        // I'll stick to 'handleSave' fix mostly. For Delete, I'll allow it to fail or skip backend for now to avoid scope creep, 
-        // OR I'll explicitly Add deleteClient to controller in next step.
-        // Better: Add deleteClient to controller. It's quick.
-
-        await fetch(`${API_URL}/clients/${clientToDelete}`, { method: 'DELETE' });
-
+        await api.deleteClient(clientToDelete);
         setClients(prev => prev.filter(c => c.id !== clientToDelete));
         setClientToDelete(null);
       } catch (e) {

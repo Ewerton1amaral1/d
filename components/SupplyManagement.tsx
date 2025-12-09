@@ -7,7 +7,7 @@ interface SupplyManagementProps {
   setSupplies: React.Dispatch<React.SetStateAction<SupplyItem[]>>;
 }
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+import { api } from '../services/api';
 
 export const SupplyManagement: React.FC<SupplyManagementProps> = ({ supplies, setSupplies }) => {
   const [newItem, setNewItem] = useState<Partial<SupplyItem>>({ unit: 'un', quantity: 0, minQuantity: 5 });
@@ -16,40 +16,27 @@ export const SupplyManagement: React.FC<SupplyManagementProps> = ({ supplies, se
     if (!newItem.name) return;
 
     try {
-      const res = await fetch(`${API_URL}/supplies`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...newItem,
-          unit: newItem.unit || 'un',
-          quantity: Number(newItem.quantity) || 0,
-          minQuantity: Number(newItem.minQuantity) || 0
-        })
+      const saved = await api.createSupply({
+        ...newItem,
+        unit: newItem.unit || 'un',
+        quantity: Number(newItem.quantity) || 0,
+        minQuantity: Number(newItem.minQuantity) || 0
       });
 
-      if (res.ok) {
-        const saved = await res.json();
-        setSupplies(prev => [...prev, saved]);
-        setNewItem({ unit: 'un', quantity: 0, minQuantity: 5, name: '' });
-      } else {
-        alert("Erro ao adicionar item.");
-      }
+      setSupplies(prev => [...prev, saved]);
+      setNewItem({ unit: 'un', quantity: 0, minQuantity: 5, name: '' });
     } catch (e) {
-      alert("Erro de conexão.");
+      alert("Erro ao adicionar item.");
     }
   };
 
   const handleDelete = async (id: string) => {
     if (window.confirm('Remover este item do estoque?')) {
       try {
-        const res = await fetch(`${API_URL}/supplies/${id}`, { method: 'DELETE' });
-        if (res.ok) {
-          setSupplies(prev => prev.filter(s => s.id !== id));
-        } else {
-          alert("Erro ao excluir.");
-        }
+        await api.deleteSupply(id);
+        setSupplies(prev => prev.filter(s => s.id !== id));
       } catch (e) {
-        alert("Erro de conexão.");
+        alert("Erro ao excluir.");
       }
     }
   };
@@ -64,11 +51,7 @@ export const SupplyManagement: React.FC<SupplyManagementProps> = ({ supplies, se
     setSupplies(prev => prev.map(s => s.id === id ? { ...s, quantity: newQtd } : s));
 
     try {
-      await fetch(`${API_URL}/supplies/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ quantity: newQtd })
-      });
+      await api.updateSupply(id, { quantity: newQtd });
     } catch (e) {
       console.error("Failed to update qty", e);
       // Could revert here if needed

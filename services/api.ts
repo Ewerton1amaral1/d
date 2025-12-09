@@ -67,6 +67,7 @@ export const api = {
   async getProducts(storeId?: string) {
     const query = storeId ? `?storeId=${storeId}` : '';
     const res = await authFetch(`${API_URL}/products${query}`);
+    if (!res.ok) throw new Error('Failed to fetch products');
     return res.json();
   },
   async createProduct(storeId: string, product: any) {
@@ -74,6 +75,7 @@ export const api = {
       method: "POST",
       body: JSON.stringify(product),
     });
+    if (!res.ok) throw new Error('Failed to create product');
     return res.json();
   },
   async updateProduct(id: string, updates: any) {
@@ -81,18 +83,21 @@ export const api = {
       method: "PUT",
       body: JSON.stringify(updates),
     });
+    if (!res.ok) throw new Error('Failed to update product');
     return res.json();
   },
   async deleteProduct(id: string) {
     const res = await authFetch(`${API_URL}/products/${id}`, {
       method: "DELETE",
     });
+    if (!res.ok) throw new Error('Failed to delete product');
     return res.json();
   },
 
   // --- CLIENTS ---
   async getClients(storeId?: string) {
     const res = await authFetch(`${API_URL}/clients`);
+    if (!res.ok) throw new Error('Failed to fetch clients');
     return res.json();
   },
   async createClient(storeId: string, client: any) {
@@ -100,12 +105,29 @@ export const api = {
       method: "POST",
       body: JSON.stringify(client),
     });
+    if (!res.ok) throw new Error('Failed to create client');
+    return res.json();
+  },
+  async updateClient(id: string, updates: any) {
+    const res = await authFetch(`${API_URL}/clients/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(updates),
+    });
+    if (!res.ok) throw new Error('Failed to update client');
+    return res.json();
+  },
+  async deleteClient(id: string) {
+    const res = await authFetch(`${API_URL}/clients/${id}`, {
+      method: "DELETE",
+    });
+    if (!res.ok) throw new Error('Failed to delete client');
     return res.json();
   },
 
   // --- ORDERS ---
   async getOrders(storeId?: string) {
     const res = await authFetch(`${API_URL}/orders`);
+    if (!res.ok) throw new Error('Failed to fetch orders');
     return res.json();
   },
   async createOrder(storeId: string, order: any) {
@@ -113,6 +135,7 @@ export const api = {
       method: "POST",
       body: JSON.stringify(order),
     });
+    if (!res.ok) throw new Error('Failed to create order');
     return res.json();
   },
   async updateOrder(storeId: string, orderId: string, updates: any) {
@@ -120,12 +143,23 @@ export const api = {
       method: "PUT",
       body: JSON.stringify(updates),
     });
+    if (!res.ok) throw new Error('Failed to update order');
+    return res.json();
+  },
+  // Added specific status update just in case, but updateOrder covers it
+  async updateOrderStatus(orderId: string, status: string) {
+    const res = await authFetch(`${API_URL}/orders/${orderId}/status`, {
+      method: "PUT",
+      body: JSON.stringify({ status }),
+    });
+    if (!res.ok) throw new Error('Failed to update order status');
     return res.json();
   },
 
   // --- SETTINGS ---
   async getSettings(storeId?: string) {
     const res = await authFetch(`${API_URL}/settings`);
+    if (!res.ok) throw new Error('Failed to fetch settings');
     return res.json();
   },
   async saveSettings(storeId: string, settings: any) {
@@ -133,12 +167,14 @@ export const api = {
       method: "POST",
       body: JSON.stringify(settings),
     });
+    if (!res.ok) throw new Error('Failed to save settings');
     return res.json();
   },
 
   // --- DRIVERS ---
   async getDrivers(storeId?: string) {
     const res = await authFetch(`${API_URL}/drivers`);
+    if (!res.ok) throw new Error('Failed to fetch drivers');
     return res.json();
   },
   async createDriver(storeId: string, driver: any) {
@@ -146,6 +182,7 @@ export const api = {
       method: "POST",
       body: JSON.stringify(driver),
     });
+    if (!res.ok) throw new Error('Failed to create driver');
     return res.json();
   },
   async updateDriver(id: string, updates: any) {
@@ -153,38 +190,99 @@ export const api = {
       method: "PUT",
       body: JSON.stringify(updates),
     });
+    if (!res.ok) throw new Error('Failed to update driver');
     return res.json();
   },
   async deleteDriver(id: string) {
     const res = await authFetch(`${API_URL}/drivers/${id}`, {
       method: "DELETE",
     });
+    if (!res.ok) throw new Error('Failed to delete driver');
     return res.json();
   },
 
   // --- EMPLOYEES ---
   async getEmployees() {
     const res = await authFetch(`${API_URL}/employees`);
+    if (!res.ok) throw new Error('Failed to fetch employees');
+    return res.json();
+  },
+  async createEmployee(employee: any) {
+    const res = await authFetch(`${API_URL}/employees`, {
+      method: "POST",
+      body: JSON.stringify(employee),
+    });
+    if (!res.ok) throw new Error('Failed to create employee');
+    return res.json();
+  },
+  async updateEmployee(id: string, updates: any) {
+    const res = await authFetch(`${API_URL}/employees/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(updates),
+    });
+    if (!res.ok) throw new Error('Failed to update employee');
+    return res.json();
+  },
+  async deleteEmployee(id: string) {
+    const res = await authFetch(`${API_URL}/employees/${id}`, {
+      method: "DELETE",
+    });
+    if (!res.ok) throw new Error('Failed to delete employee');
+    return res.json();
+  },
+  async addEmployeeAdvance(employeeId: string, advance: any) {
+    const res = await authFetch(`${API_URL}/employees/${employeeId}/advances`, {
+      method: "POST",
+      body: JSON.stringify(advance),
+    });
+    if (!res.ok) throw new Error('Failed to add advance');
     return res.json();
   },
 
   // --- SUPPLIES ---
   async getSupplies() {
     const res = await authFetch(`${API_URL}/supplies`);
+    if (!res.ok) throw new Error('Failed to fetch supplies');
+    return res.json();
+  },
+  async createSupply(supply: any) {
+    const res = await authFetch(`${API_URL}/supplies`, {
+      method: "POST",
+      body: JSON.stringify(supply),
+    });
+    if (!res.ok) throw new Error('Failed to create supply');
+    return res.json();
+  },
+  async updateSupply(id: string, updates: any) {
+    const res = await authFetch(`${API_URL}/supplies/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(updates),
+    });
+    if (!res.ok) throw new Error('Failed to update supply');
+    return res.json();
+  },
+  async deleteSupply(id: string) {
+    const res = await authFetch(`${API_URL}/supplies/${id}`, {
+      method: "DELETE",
+    });
+    if (!res.ok) throw new Error('Failed to delete supply');
     return res.json();
   },
 
   // --- WHATSAPP ---
   async getWhatsappStatus() {
     const res = await authFetch(`${API_URL}/whatsapp/status`);
+    if (!res.ok) throw new Error('Failed to fetch whatsapp status');
     return res.json();
   },
   async getChats() {
     const res = await authFetch(`${API_URL}/whatsapp/chats`);
+    if (!res.ok) throw new Error('Failed to fetch chats');
     return res.json();
   },
   async getMessages(chatId: string) {
     const res = await authFetch(`${API_URL}/whatsapp/chats/${chatId}/messages`);
+    if (!res.ok) throw new Error('Failed to fetch messages');
     return res.json();
   },
   async sendMessage(chatId: string, message: string) {
@@ -192,18 +290,21 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ message }),
     });
+    if (!res.ok) throw new Error('Failed to send message');
     return res.json();
   },
   async deleteMessage(messageId: string) {
     const res = await authFetch(`${API_URL}/whatsapp/messages/${messageId}`, {
       method: "DELETE",
     });
+    if (!res.ok) throw new Error('Failed to delete message');
     return res.json();
   },
 
   // --- ADMIN ---
   async getAdminStores() {
     const res = await authFetch(`${API_URL}/admin/stores`);
+    if (!res.ok) throw new Error('Failed to fetch stores');
     return res.json();
   },
   async toggleStoreStatus(storeId: string, isActive: boolean) {
@@ -211,6 +312,7 @@ export const api = {
       method: "PUT",
       body: JSON.stringify({ isActive }),
     });
+    if (!res.ok) throw new Error('Failed to toggle store status');
     return res.json();
   }
 };
