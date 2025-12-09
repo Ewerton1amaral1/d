@@ -75,6 +75,8 @@ export class WhatsappManager {
         });
 
         client.on('message', async (msg) => {
+            console.log(`[Store ${storeId}] Raw message received from ${msg.from}: ${msg.body}`);
+            if (msg.from === 'status@broadcast') return;
             if (msg.fromMe) return;
             this.handleMessage(storeId, msg, client);
         });
