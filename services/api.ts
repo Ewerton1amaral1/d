@@ -1,4 +1,11 @@
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001/api";
+let envUrl = import.meta.env.VITE_API_URL || "http://localhost:3001/api";
+// Sanitize URL: Remove trailing slash and fix double /api/api
+envUrl = envUrl.replace(/\/+$/, '');
+if (envUrl.endsWith('/api/api')) {
+  envUrl = envUrl.substring(0, envUrl.length - 4);
+}
+const API_URL = envUrl;
+
 console.log("DEBUG: Current API_URL is:", API_URL);
 
 export const api = {
