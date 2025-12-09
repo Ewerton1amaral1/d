@@ -9,8 +9,8 @@ RUN apk add --no-cache python3 make g++
 COPY package*.json ./
 COPY prisma ./prisma/
 
-# Force strict clean install
-RUN rm -rf package-lock.json node_modules && npm install
+# Strict clean install using lockfile
+RUN npm ci
 
 RUN npx prisma generate
 
