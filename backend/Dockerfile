@@ -1,5 +1,5 @@
 # Build Stage
-FROM node:20-alpine AS builder
+FROM node:20-slim AS builder
 
 # Prevent puppeteer from downloading chrome during npm install
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
@@ -7,19 +7,14 @@ ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 WORKDIR /app
 
 # Install build tools needed for some npm packages
-RUN apk add --no-cache python3 make g++
+RUN apt-get update && apt-get install -y python3 make g++ && rm -rf /var/lib/apt/lists/*
 
 # Copy root package files first to leverage caching
 COPY package.json package-lock.json ./
 # Copy backend package file
 COPY backend/package.json ./backend/
 
-# Install dependencies from root (this installs everything including workspace deps)
-# We use --workspace=backend to install only backend deps + shared, but usually installing all is safer/easier
-# Debug: List files to verify copy
-RUN ls -la
-RUN ls -la backend
-# Use npm install instead of npm ci to be more robust against lockfile mismatches
+# Install dependencies from root
 RUN npm install
 
 WORKDIR /app/backend
@@ -32,36 +27,29 @@ COPY backend/. .
 RUN npm run build
 
 # Production Stage
-FROM node:20-alpine AS runner
+FROM node:20-slim AS runner
 
 WORKDIR /app
 
 ENV NODE_ENV=production
 
-# Install Chrome dependencies for Puppeteer
-# Added glib and eudev to fix missing shared library errors
-RUN apk add --no-cache \
+# Install Chrome dependencies for Puppeteer (Debian)
+# Using chromium from apt is much more stable than Alpine edge
+RUN apt-get update && apt-get install -y \
     chromium \
-    nss \
-    freetype \
-    harfbuzz \
+    libnss3 \
+    libfreetype6 \
+    libharfbuzz0b \
     ca-certificates \
-    ttf-freefont \
-    nodejs \
-    yarn \
-    glib \
-    eudev
+    fonts-freefont-ttf \
+    && rm -rf /var/lib/apt/lists/*
 
 # Tell Puppeteer to skip downloading Chrome. We'll use the installed package.
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
-    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
 # Copy necessary files from builder
-# Note: node_modules structure might be different in monorepo, usually hoisted to root
 COPY --from=builder /app/node_modules ./node_modules
-# Also copy backend specific modules if any (though usually hoist)
-# COPY --from=builder /app/backend/node_modules ./backend/node_modules
-
 COPY --from=builder /app/backend/package.json ./
 COPY --from=builder /app/backend/dist ./dist
 COPY --from=builder /app/backend/prisma ./prisma
